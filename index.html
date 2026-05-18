@@ -251,26 +251,28 @@
 </div>
 
 <script>
-  // ── SET YOUR ACCESS CODE HERE ──────────────────────────────────────────────
-  const ACCESS_CODE = 'pldg2026';   // change this to whatever you want
+ 
   const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbzzitV4EGP2I0WDsYaZhhmP1QvoLNsScqe2OzQsz9boFo6qyN1qDLNfqOjJvUbnQxCt_Q/exec';           // paste your Apps Script URL between the quotes
-  // ──────────────────────────────────────────────────────────────────────────
-
   const CW = {1:11, 2:11, 3:11, 4:11, 5:5, 6:11};
-  let selC = new Set(), selT = new Set();
+let selC = new Set(), selT = new Set();
 
-  function checkCode() {
-    const input = document.getElementById('code-input').value.trim();
-    const errEl = document.getElementById('gate-err');
-    if (!input) { errEl.textContent = 'Please enter the access code.'; return; }
-    if (input.toLowerCase() === ACCESS_CODE.toLowerCase()) {
-      document.getElementById('gate').style.display = 'none';
-      document.getElementById('form-section').style.display = 'block';
-    } else {
-      errEl.textContent = 'Incorrect code. Please check and try again.';
-      document.getElementById('code-input').focus();
-    }
+async function checkCode() {
+  const input = document.getElementById('code-input').value.trim().toLowerCase();
+  const errEl = document.getElementById('gate-err');
+  if (!input) { errEl.textContent = 'Please enter the access code.'; return; }
+
+  const msgBuffer = new TextEncoder().encode(input);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+  const hashHex = Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+
+  if (hashHex === '8a0fcd7f87437392a2fbe73fbdb80dd18c425e07ecf75fcd536bb0a1e4afe815') {
+    document.getElementById('gate').style.display = 'none';
+    document.getElementById('form-section').style.display = 'block';
+  } else {
+    errEl.textContent = 'Incorrect code. Please check and try again.';
+    document.getElementById('code-input').focus();
   }
+}
 
   function toggleC(el) {
     const c = el.dataset.c;
