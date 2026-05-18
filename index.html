@@ -244,15 +244,15 @@
           <button class="dl-btn" onclick="dlLetter()">↓ Download .txt</button>
         </div>
       </div>
-      <p class="dl-hint">To create a PDF: open the .txt in Google Docs → File → Download → PDF.</p>
+      <p class="dl-hint">Opens as a formatted document. To make a PDF: open the .html file in Chrome → File → Print → Save as PDF.</p>
     </div>
 
   </div>
 </div>
 
 <script>
- 
-  const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbzzitV4EGP2I0WDsYaZhhmP1QvoLNsScqe2OzQsz9boFo6qyN1qDLNfqOjJvUbnQxCt_Q/exec';           // paste your Apps Script URL between the quotes
+
+  const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbzzitV4EGP2I0WDsYaZhhmP1QvoLNsScqe2OzQsz9boFo6qyN1qDLNfqOjJvUbnQxCt_Q/exec';           
   const CW = {1:11, 2:11, 3:11, 4:11, 5:5, 6:11};
 let selC = new Set(), selT = new Set();
 
@@ -273,7 +273,6 @@ async function checkCode() {
     document.getElementById('code-input').focus();
   }
 }
-
   function toggleC(el) {
     const c = el.dataset.c;
     selC.has(c) ? (selC.delete(c), el.classList.remove('on')) : (selC.add(c), el.classList.add('on'));
@@ -353,7 +352,10 @@ Sincerely,
 
 Anubha Maneshwar
 Program Manager, Protocol Labs
-Protocol Labs Dev Guild (PLDG)`;
+Protocol Labs Dev Guild (PLDG)
+anubhamane@gmail.com
+
+For verification purposes, recipients may contact the program team directly at the email address above.`;
 
     document.getElementById('output').style.display = 'block';
     document.getElementById('output').scrollIntoView({behavior:'smooth', block:'start'});
@@ -368,12 +370,69 @@ Protocol Labs Dev Guild (PLDG)`;
   }
 
   function dlLetter() {
-    const name = document.getElementById('name').value.trim() || 'contributor';
-    const blob = new Blob([document.getElementById('lbody').textContent], {type:'text/plain'});
+    const name    = document.getElementById('name').value.trim() || 'contributor';
+    const content = document.getElementById('lbody').textContent;
+
+    const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>PLDG Recommendation — ${name}</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Lora:wght@400;600&family=DM+Sans:wght@400;500&display=swap');
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #f4f3f0; padding: 48px 24px; font-family: 'DM Sans', sans-serif; }
+    .page {
+      max-width: 720px; margin: 0 auto;
+      background: #ffffff;
+      border: 1px solid #dedad3;
+      border-radius: 4px;
+      padding: 72px 80px;
+    }
+    .header {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      padding-bottom: 28px; margin-bottom: 36px;
+      border-bottom: 2px solid #1a1916;
+    }
+    .org { font-size: 13px; font-weight: 500; color: #1a1916; letter-spacing: .04em; text-transform: uppercase; }
+    .org-sub { font-size: 12px; color: #6b6860; margin-top: 3px; }
+    .doc-label { font-size: 11px; color: #9c9a94; text-transform: uppercase; letter-spacing: .06em; text-align: right; }
+    .body-text {
+      font-family: 'Lora', Georgia, serif;
+      font-size: 14.5px; line-height: 2;
+      color: #1a1916; white-space: pre-wrap; word-wrap: break-word;
+    }
+    .footer {
+      margin-top: 48px; padding-top: 20px;
+      border-top: 1px solid #dedad3;
+      font-size: 11px; color: #9c9a94;
+      display: flex; justify-content: space-between;
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="header">
+      <div>
+        <div class="org">Protocol Labs Dev Guild</div>
+        <div class="org-sub">protocol.ai</div>
+      </div>
+      <div class="doc-label">Letter of Recommendation</div>
+    </div>
+    <div class="body-text">${content.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>
+    <div class="footer">
+      <span>Protocol Labs Dev Guild (PLDG)</span>
+      <span>anubhamane@gmail.com</span>
+    </div>
+  </div>
+</body>
+</html>`;
+
+    const blob = new Blob([html], {type: 'text/html'});
     const url  = URL.createObjectURL(blob);
     const a    = document.createElement('a');
     a.href = url;
-    a.download = 'PLDG_Recommendation_' + name.replace(/\s+/g, '_') + '.txt';
+    a.download = 'PLDG_Recommendation_' + name.replace(/\s+/g, '_') + '.html';
     a.click();
     URL.revokeObjectURL(url);
   }
