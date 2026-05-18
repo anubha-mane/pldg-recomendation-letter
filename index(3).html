@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PLDG Recommendation Letter Generator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&family=Lora:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f9f8f6;
+      --surface: #ffffff;
+      --border: #e4e2dc;
+      --border-strong: #c8c5bc;
+      --text: #1a1916;
+      --muted: #6b6860;
+      --hint: #9c9a94;
+      --blue-bg: #edf4fd;
+      --blue-border: #4a9ae8;
+      --blue-text: #1a5fa8;
+      --green-bg: #edf7ee;
+      --green-border: #4ea553;
+      --green-text: #1e6b24;
+      --red: #c0392b;
+      --radius: 8px;
+      --radius-lg: 12px;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 2rem 1rem;
+    }
+
+    .page { max-width: 660px; margin: 0 auto; }
+
+    /* Header */
+    .page-header { margin-bottom: 2rem; }
+    .pl-logo { display: flex; align-items: center; gap: 10px; margin-bottom: 1.25rem; }
+    .pl-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--text); }
+    .pl-name { font-size: 13px; font-weight: 500; color: var(--muted); letter-spacing: .04em; text-transform: uppercase; }
+    .page-header h1 { font-size: 22px; font-weight: 500; color: var(--text); margin-bottom: 6px; }
+    .page-header p { font-size: 14px; color: var(--muted); line-height: 1.6; }
+
+    .stats-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 1.25rem 0 0; }
+    .stat-pill { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 5px 12px; font-size: 12px; color: var(--muted); }
+
+    /* Form */
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.75rem; margin-bottom: 1rem; }
+    .card-title { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: .06em; color: var(--hint); margin-bottom: 1.25rem; }
+
+    .field { margin-bottom: 1.1rem; }
+    .field:last-child { margin-bottom: 0; }
+    .field label { display: block; font-size: 13px; font-weight: 500; color: var(--muted); margin-bottom: 5px; }
+    .field input, .field textarea {
+      width: 100%; padding: 9px 12px;
+      border: 1px solid var(--border); border-radius: var(--radius);
+      font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--text);
+      background: var(--bg); outline: none; transition: border-color .15s;
+    }
+    .field input:focus, .field textarea:focus { border-color: var(--border-strong); background: #fff; }
+    .field textarea { resize: vertical; min-height: 64px; line-height: 1.5; }
+    .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    /* Cohort grid */
+    .cohort-grid { display: grid; grid-template-columns: repeat(6,1fr); gap: 8px; margin-bottom: 8px; }
+    .cb {
+      border: 1px solid var(--border); background: var(--bg);
+      border-radius: var(--radius); padding: 11px 4px;
+      text-align: center; cursor: pointer;
+      font-size: 13px; font-weight: 500; color: var(--muted);
+      transition: all .15s; user-select: none;
+    }
+    .cb:hover { border-color: var(--border-strong); color: var(--text); background: #fff; }
+    .cb.on { background: var(--blue-bg); border-color: var(--blue-border); color: var(--blue-text); }
+    .cb.c5 { border-style: dashed; }
+    .hint { font-size: 12px; color: var(--hint); margin-top: 5px; line-height: 1.5; }
+    .tenure-box {
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 11px 14px;
+      font-size: 14px; color: var(--muted); margin-top: 10px; line-height: 1.5;
+    }
+    .tenure-box strong { color: var(--text); font-weight: 500; }
+
+    /* Tech chips */
+    .chip-wrap { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 8px; }
+    .tc {
+      border: 1px solid var(--border); background: var(--bg);
+      border-radius: 20px; padding: 5px 13px;
+      font-size: 13px; cursor: pointer; color: var(--muted);
+      transition: all .15s; user-select: none;
+    }
+    .tc:hover { border-color: var(--border-strong); color: var(--text); background: #fff; }
+    .tc.on { background: var(--green-bg); border-color: var(--green-border); color: var(--green-text); }
+
+    /* Projects */
+    .pr-row { display: flex; gap: 8px; margin-bottom: 8px; align-items: center; }
+    .pr-row input { flex: 1; }
+    .rm-btn {
+      width: 34px; height: 38px; flex-shrink: 0;
+      border: 1px solid var(--border); background: transparent;
+      border-radius: var(--radius); cursor: pointer; color: var(--hint);
+      font-size: 18px; display: flex; align-items: center; justify-content: center;
+      transition: all .15s; line-height: 1;
+    }
+    .rm-btn:hover { background: #fff5f5; border-color: #e8c0c0; color: var(--red); }
+    .add-link {
+      font-size: 13px; color: var(--muted); background: none; border: none;
+      cursor: pointer; display: inline-flex; align-items: center; gap: 5px; padding: 0;
+    }
+    .add-link:hover { color: var(--text); }
+
+    /* Error */
+    .err { font-size: 13px; color: var(--red); margin-top: 8px; display: none; }
+
+    /* Generate button */
+    .gen-btn {
+      width: 100%; padding: 13px;
+      background: var(--text); color: #fff;
+      border: none; border-radius: var(--radius);
+      font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 500;
+      cursor: pointer; margin-top: .5rem; transition: opacity .15s;
+    }
+    .gen-btn:hover { opacity: .85; }
+    .gen-btn:active { opacity: .7; }
+
+    /* Letter output */
+    .letter-outer { margin-top: 1.75rem; display: none; }
+    .letter-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); overflow: hidden;
+    }
+    .letter-topbar {
+      background: var(--bg); border-bottom: 1px solid var(--border);
+      padding: 10px 20px; display: flex; justify-content: space-between; align-items: center;
+      font-size: 11px; color: var(--hint); text-transform: uppercase; letter-spacing: .05em;
+    }
+    .letter-content {
+      padding: 2.5rem 2.75rem;
+      font-family: 'Lora', Georgia, serif;
+      font-size: 14.5px; line-height: 1.95;
+      color: var(--text); white-space: pre-wrap; word-wrap: break-word;
+    }
+    .letter-actions { padding: 1.25rem 1.75rem; border-top: 1px solid var(--border); display: flex; gap: 10px; }
+    .dl-btn {
+      flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 11px; background: var(--surface); border: 1px solid var(--border-strong);
+      border-radius: var(--radius); font-family: 'DM Sans', sans-serif;
+      font-size: 14px; font-weight: 500; cursor: pointer; color: var(--text); transition: all .15s;
+    }
+    .dl-btn:hover { background: var(--bg); }
+    .dl-hint { font-size: 12px; color: var(--hint); margin-top: 8px; line-height: 1.5; text-align: center; }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <div class="page-header">
+    <div class="pl-logo">
+      <div class="pl-dot"></div>
+      <span class="pl-name">Protocol Labs Dev Guild</span>
+    </div>
+    <h1>Recommendation Letter Generator</h1>
+    <p>For PLDG alumni — fill in your contribution details to generate and download your letter.</p>
+    <div class="stats-row">
+      <span class="stat-pill">6 cohorts</span>
+      <span class="stat-pill">~6% global acceptance</span>
+      <span class="stat-pill">5,000+ PRs merged</span>
+      <span class="stat-pill">20+ countries</span>
+    </div>
+  </div>
+
+  <!-- Identity -->
+  <div class="card">
+    <p class="card-title">Your details</p>
+    <div class="field">
+      <label>Full name</label>
+      <input type="text" id="name" placeholder="e.g. Priya Sharma" autocomplete="name" />
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label>GitHub username</label>
+        <input type="text" id="github" placeholder="e.g. priyasharma" />
+      </div>
+      <div class="field">
+        <label>Email <span style="font-weight:400;color:var(--hint)">(for records)</span></label>
+        <input type="email" id="email" placeholder="you@email.com" autocomplete="email" />
+      </div>
+    </div>
+  </div>
+
+  <!-- Cohorts -->
+  <div class="card">
+    <p class="card-title">Cohorts attended</p>
+    <div class="cohort-grid">
+      <div class="cb" data-c="1" onclick="toggleC(this)">C1</div>
+      <div class="cb" data-c="2" onclick="toggleC(this)">C2</div>
+      <div class="cb" data-c="3" onclick="toggleC(this)">C3</div>
+      <div class="cb" data-c="4" onclick="toggleC(this)">C4</div>
+      <div class="cb c5" data-c="5" onclick="toggleC(this)" title="Cohort 5 — 5 weeks">C5 *</div>
+      <div class="cb" data-c="6" onclick="toggleC(this)">C6</div>
+    </div>
+    <p class="hint">* Cohort 5 was 5 weeks. All other cohorts were approximately 11 weeks (≈ 3 months).</p>
+    <div class="tenure-box" id="tbox">Select your cohorts above — tenure will auto-calculate here.</div>
+  </div>
+
+  <!-- Technologies -->
+  <div class="card">
+    <p class="card-title">Technologies used</p>
+    <div class="chip-wrap">
+      <div class="tc" onclick="toggleT(this)">Rust</div>
+      <div class="tc" onclick="toggleT(this)">Go</div>
+      <div class="tc" onclick="toggleT(this)">JavaScript</div>
+      <div class="tc" onclick="toggleT(this)">TypeScript</div>
+      <div class="tc" onclick="toggleT(this)">Python</div>
+      <div class="tc" onclick="toggleT(this)">Solidity</div>
+      <div class="tc" onclick="toggleT(this)">IPFS</div>
+      <div class="tc" onclick="toggleT(this)">Filecoin</div>
+      <div class="tc" onclick="toggleT(this)">libp2p</div>
+      <div class="tc" onclick="toggleT(this)">WebAssembly</div>
+      <div class="tc" onclick="toggleT(this)">Docker</div>
+      <div class="tc" onclick="toggleT(this)">Ethereum</div>
+      <div class="tc" onclick="toggleT(this)">Cairo</div>
+      <div class="tc" onclick="toggleT(this)">GraphQL</div>
+      <div class="tc" onclick="toggleT(this)">Starknet</div>
+      <div class="tc" onclick="toggleT(this)">React</div>
+      <div class="tc" onclick="toggleT(this)">Node.js</div>
+      <div class="tc" onclick="toggleT(this)">Kubernetes</div>
+    </div>
+    <div class="field" style="margin:0;">
+      <label>Other technologies</label>
+      <input type="text" id="tech-extra" placeholder="e.g. Hardhat, Cairo, Noir (comma-separated)" />
+    </div>
+  </div>
+
+  <!-- Projects -->
+  <div class="card">
+    <p class="card-title">Projects contributed to</p>
+    <div id="proj-list">
+      <div class="pr-row">
+        <input type="text" placeholder="Project name or brief description" />
+        <button class="rm-btn" onclick="removeP(this)" aria-label="Remove project">×</button>
+      </div>
+      <div class="pr-row">
+        <input type="text" placeholder="Project name or brief description" />
+        <button class="rm-btn" onclick="removeP(this)" aria-label="Remove project">×</button>
+      </div>
+    </div>
+    <button class="add-link" onclick="addP()">+ Add another project</button>
+  </div>
+
+  <div id="err" class="err"></div>
+  <button class="gen-btn" onclick="generate()">Generate recommendation letter →</button>
+
+  <!-- Output -->
+  <div class="letter-outer" id="output">
+    <div class="letter-card">
+      <div class="letter-topbar">
+        <span>Protocol Labs Dev Guild — Letter of Recommendation</span>
+        <span id="ldate"></span>
+      </div>
+      <div class="letter-content" id="lbody"></div>
+      <div class="letter-actions">
+        <button class="dl-btn" onclick="dlLetter()">↓ Download .txt</button>
+      </div>
+    </div>
+    <p class="dl-hint">To make a PDF: open the .txt in Google Docs (File → Open) → File → Download → PDF.</p>
+  </div>
+
+</div>
+
+<script>
+  // ── CONFIG ──────────────────────────────────────────────────
+  // Paste your Google Apps Script Web App URL here after Step 4:
+  const WEBHOOK_URL = '';
+  // ────────────────────────────────────────────────────────────
+
+  const CW = {1:11, 2:11, 3:11, 4:11, 5:5, 6:11};
+  let selC = new Set(), selT = new Set();
+
+  function toggleC(el) {
+    const c = el.dataset.c;
+    selC.has(c) ? (selC.delete(c), el.classList.remove('on')) : (selC.add(c), el.classList.add('on'));
+    updateTenure();
+  }
+
+  function updateTenure() {
+    const b = document.getElementById('tbox');
+    if (!selC.size) { b.innerHTML = 'Select your cohorts above — tenure will auto-calculate here.'; b._t = ''; return; }
+    const sorted = [...selC].map(Number).sort((a,z) => a - z);
+    const weeks = sorted.reduce((s, c) => s + CW[c], 0);
+    const mo = Math.round(weeks / 4.33);
+    const tenureStr = weeks >= 8 ? `approximately ${mo} month${mo !== 1 ? 's' : ''}` : `${weeks} weeks`;
+    const cl = sorted.map(c => `Cohort ${c}`).join(', ');
+    b.innerHTML = `<strong>${cl}</strong> &mdash; <strong>${tenureStr}</strong> (${weeks} weeks total)`;
+    b._t = tenureStr; b._cl = cl; b._w = weeks;
+  }
+
+  function toggleT(el) {
+    const t = el.textContent.trim();
+    selT.has(t) ? (selT.delete(t), el.classList.remove('on')) : (selT.add(t), el.classList.add('on'));
+  }
+
+  function addP() {
+    const list = document.getElementById('proj-list');
+    if (list.children.length >= 4) return;
+    const r = document.createElement('div'); r.className = 'pr-row';
+    r.innerHTML = '<input type="text" placeholder="Project name or brief description" /><button class="rm-btn" onclick="removeP(this)" aria-label="Remove project">×</button>';
+    list.appendChild(r);
+  }
+
+  function removeP(btn) {
+    const list = document.getElementById('proj-list');
+    if (list.children.length > 1) btn.parentElement.remove();
+  }
+
+  function generate() {
+    const name   = document.getElementById('name').value.trim();
+    const github = document.getElementById('github').value.trim();
+    const email  = document.getElementById('email').value.trim();
+    const errEl  = document.getElementById('err');
+
+    if (!name)       { errEl.textContent = 'Please enter your full name.'; errEl.style.display = 'block'; return; }
+    if (!selC.size)  { errEl.textContent = 'Please select at least one cohort.'; errEl.style.display = 'block'; return; }
+    errEl.style.display = 'none';
+
+    const tb = document.getElementById('tbox');
+    const tenure     = tb._t  || 'multiple months';
+    const cohortLabel = tb._cl || '';
+
+    const extra   = document.getElementById('tech-extra').value.split(',').map(s => s.trim()).filter(Boolean);
+    const allTechs = [...selT, ...extra];
+    const techStr  = allTechs.length ? allTechs.join(', ') : 'various open-source technologies';
+
+    const projs    = [...document.querySelectorAll('#proj-list input')].map(i => i.value.trim()).filter(Boolean);
+    const projStr  = projs.length ? projs.join(', ') : 'ecosystem initiatives';
+
+    const today  = new Date();
+    const dateStr = today.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    document.getElementById('ldate').textContent = dateStr;
+
+    const letter =
+`${dateStr}
+
+To Whom It May Concern,
+
+This letter serves as a formal recommendation for ${name}${github ? ` (GitHub: @${github})` : ''}, who successfully contributed as a participant in the Protocol Labs Dev Guild (PLDG) program conducted by Protocol Labs.
+
+PLDG is a highly selective global open-source contributor initiative designed to support developers working across the decentralized technology ecosystem. Across six cohorts, the program received applications from contributors representing more than 20 countries, with an approximate acceptance rate of 6%.
+
+During their participation spanning ${tenure} (${cohortLabel}), ${name} actively contributed to open-source projects and ecosystem initiatives associated with Protocol Labs and partner blockchain ecosystems. Their contributions included work involving ${techStr} across projects such as ${projStr}.
+
+Throughout the program, contributors were expected to collaborate in fast-paced open-source environments, participate in technical reviews, ship production-level contributions, and engage with globally distributed developer communities.
+
+${name} demonstrated strong initiative, technical consistency, collaborative ability, and commitment to open-source development during their tenure in the program.
+
+Collectively, contributors across PLDG cohorts delivered more than 5,000 merged pull requests across multiple blockchain and infrastructure ecosystems.
+
+We appreciate their contributions and confidently recommend them for future technical, research, open-source, or engineering opportunities.
+
+Sincerely,
+
+Anubha Maneshwar
+Program Manager, Protocol Labs
+Protocol Labs Dev Guild (PLDG)`;
+
+    document.getElementById('lbody').textContent = letter;
+    document.getElementById('output').style.display = 'block';
+    document.getElementById('output').scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    logEntry(name, github, email, cohortLabel, tenure, techStr, projStr, dateStr);
+  }
+
+  function dlLetter() {
+    const name = document.getElementById('name').value.trim() || 'contributor';
+    const text = document.getElementById('lbody').textContent;
+    const blob = new Blob([text], { type: 'text/plain' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href = url;
+    a.download = `PLDG_Recommendation_${name.replace(/\s+/g, '_')}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function logEntry(name, github, email, cohorts, tenure, techs, projects, date) {
+    const payload = { timestamp: new Date().toISOString(), name, github, email, cohorts, tenure, techs, projects, date };
+    console.log('PLDG letter generated:', payload);
+    if (!WEBHOOK_URL) return;
+    fetch(WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify(payload)
+    }).catch(() => {});
+  }
+</script>
+</body>
+</html>
